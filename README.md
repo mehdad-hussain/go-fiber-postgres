@@ -14,8 +14,29 @@ This Contacts Application API is built using Go with the Fiber framework and GOR
 ### Prerequisites
 Before you begin, ensure you have the following installed on your machine:
 - [Go](https://golang.org/doc/install) (version 1.17 or later)
-- [PostgreSQL](https://www.postgresql.org/download/)
-- [GORM](https://gorm.io/index.html) library
+
+Here’s the updated setup section reflecting your requirements:
+
+---
+
+### Setup Instructions
+
+Before you begin, ensure you have the following installed on your machine:
+
+- [Go](https://golang.org/doc/install) (version 1.17 or later)
+
+### Environment Configuration
+
+1. **Create a `.env` file** in the root directory of your project.
+2. **Add the following environment variables** to your `.env` file:
+
+   ```
+   DATABASE_URL=your_postgres_database_url
+   JWT_SECRET=your_jwt_secret_key
+   ```
+
+   Replace `your_postgres_database_url` with the connection string to your PostgreSQL server.
+
 
 ### Clone the Repository
 First, clone the repository to your local machine:
