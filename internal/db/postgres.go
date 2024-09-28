@@ -21,6 +21,4 @@ func Connect() {
 	}
 	log.Println("Database connection established.")
 
-	log.Printf("DB connection: %v", DB)
-
 }

@@ -1,4 +1,4 @@
-package handlers
+package user
 
 import (
 	"crypto/rand"
@@ -7,14 +7,14 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/mehdad-hussain/go-fiber-postgres/pkg/user"
+	"github.com/mehdad-hussain/go-fiber-postgres/internal/middleware"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var userRepo *user.UserRepository
+var userRepo *UserRepository
 
 // InitializeUserHandler initializes the user handler with a repository.
-func InitializeUserHandler(repository *user.UserRepository) {
+func InitializeUserHandler(repository *UserRepository) {
 	if repository == nil {
 		log.Fatal("UserRepository is not initialized")
 	}
@@ -55,7 +55,7 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	// Create user
-	newUser := &user.User{
+	newUser := &User{
 		Name:            req.Name,
 		Email:           req.Email,
 		PasswordHash:    string(hashedPassword),
@@ -90,4 +90,35 @@ func ActivateUser(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{"message": "User activated successfully"})
+}
+
+// AuthenticateUser handles user authentication and token generation.
+func AuthenticateUser(c *fiber.Ctx) error {
+	req := new(struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	})
+
+	if err := c.BodyParser(req); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
+	}
+
+	// Get user by email
+	existingUser, err := userRepo.GetUserByEmail(req.Email)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid email or password"})
+	}
+
+	// Compare the hashed password
+	if err := bcrypt.CompareHashAndPassword([]byte(existingUser.PasswordHash), []byte(req.Password)); err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid email or password"})
+	}
+
+	// Generate a JWT token using the user's ID
+	token, err := middleware.GenerateJWT(existingUser.ID)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Could not generate token"})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{"token": token})
 }

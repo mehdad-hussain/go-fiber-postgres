@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	JWTSecret string
+	JWTSecret []byte // Change from string to byte slice
 	DBUrl     string
 )
 
@@ -30,6 +30,6 @@ func LoadConfig() {
 	}
 
 	// Load the environment variables
-	JWTSecret = os.Getenv("JWT_SECRET")
+	JWTSecret = []byte(os.Getenv("JWT_SECRET")) // Convert the string to a byte slice
 	DBUrl = os.Getenv("DATABASE_URL")
 }
